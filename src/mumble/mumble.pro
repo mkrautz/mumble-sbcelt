@@ -60,6 +60,7 @@ CONFIG(no-bundled-celt):!CONFIG(sbcelt) {
 
 !CONFIG(no-bundled-celt):!CONFIG(sbcelt) {
   INCLUDEPATH	*= ../../celt-0.7.0-src/libcelt
+  LIBS *= -lcelt
 }
 
 !win32 {

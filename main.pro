@@ -9,16 +9,16 @@ CONFIG *= ordered debug_and_release
     SUBDIRS *= speexbuild
   }
 
-CONFIG(sbcelt) {
-  SUBDIRS *= sbcelt-lib-build sbcelt-helper-build
-} else {
-  unix:!CONFIG(bundled-celt):system(pkg-config --atleast-version=0.7.0 celt) {
-	CONFIG *= no-bundled-celt
+  CONFIG(sbcelt) {
+    SUBDIRS *= sbcelt-lib-build sbcelt-helper-build
+  } else {
+    unix:!CONFIG(bundled-celt):system(pkg-config --atleast-version=0.7.0 celt) {
+      CONFIG *= no-bundled-celt
+    }
+    !CONFIG(no-bundled-celt) {
+      SUBDIRS *= celt-0.7.0-build
+    }
   }
-  !CONFIG(no-bundled-celt) {
-    SUBDIRS *= celt-0.7.0-build celt-0.11.0-build
-  }
-}
 
   !CONFIG(no-opus) {
     CONFIG *= opus

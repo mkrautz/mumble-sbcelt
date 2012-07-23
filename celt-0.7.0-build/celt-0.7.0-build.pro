@@ -20,17 +20,14 @@ VERSION=$$replace(VERSION,celt-,)
 
 TEMPLATE = lib
 CONFIG -= qt
+CONFIG += static
 CONFIG += debug_and_release
 CONFIG -= warn_on
 CONFIG += warn_off
 VPATH	= ../$$SOURCEDIR/libcelt
-TARGET = celt0
+TARGET = celt
 DEFINES += HAVE_CONFIG_H
 TARGET_VERSION_EXT = .$$VERSION
-
-CONFIG(static) {
-	CONFIG -= static
-}
 
 QMAKE_CFLAGS -= -fPIE -pie
 
