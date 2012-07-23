@@ -56,6 +56,7 @@ unix:!CONFIG(bundled-celt):system(pkg-config --atleast-version=0.7.0 celt) {
 
 CONFIG(no-bundled-celt):!CONFIG(sbcelt) {
   INCLUDEPATH	*= /usr/include/celt
+  LIBS *= -lcelt  # fixme: no system is going to have celt 0.7.0; perhaps we should just drop no-bundled-celt?
 }
 
 !CONFIG(no-bundled-celt):!CONFIG(sbcelt) {
