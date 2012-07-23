@@ -33,7 +33,6 @@
 #include "UserInformation.h"
 
 #include "Audio.h"
-#include "CELTCodec.h"
 #include "Global.h"
 #include "Net.h"
 #include "ServerHandler.h"
@@ -165,11 +164,7 @@ void UserInformation::update(const MumbleProto::UserStats &msg) {
 		QStringList qsl;
 		for (int i=0;i<msg.celt_versions_size(); ++i) {
 			int v = msg.celt_versions(i);
-			CELTCodec *cc = g.qmCodecs.value(v);
-			if (cc)
-				qsl << cc->version();
-			else
-				qsl << QString::number(v, 16);
+			qsl << QString::number(v, 16);
 		}
 		qlCELT->setText(qsl.join(tr(", ")));
 	}

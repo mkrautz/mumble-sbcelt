@@ -40,7 +40,6 @@
 #include "AudioStats.h"
 #include "AudioWizard.h"
 #include "BanEditor.h"
-#include "CELTCodec.h"
 #include "Cert.h"
 #include "Channel.h"
 #include "Connection.h"
@@ -1048,11 +1047,7 @@ static const QString currentCodec() {
 		return QLatin1String("Opus");
 
 	int v = g.bPreferAlpha ? g.iCodecAlpha : g.iCodecBeta;
-	CELTCodec* cc = g.qmCodecs.value(v);
-	if (cc)
-		return QString::fromLatin1("CELT %1").arg(cc->version());
-	else
-		return QString::fromLatin1("CELT %1").arg(QString::number(v, 16));
+	return QString::fromLatin1("CELT %1").arg(QString::number(v, 16));
 }
 
 void MainWindow::on_qaServerInformation_triggered() {

@@ -33,7 +33,6 @@
 #include "AudioInput.h"
 
 #include "AudioOutput.h"
-#include "CELTCodec.h"
 #include "ServerHandler.h"
 #include "MainWindow.h"
 #include "User.h"
@@ -103,9 +102,6 @@ AudioInput::AudioInput() : opusBuffer(g.s.iFramesPerPacket * (SAMPLE_RATE / 100)
 
 	umtType = MessageHandler::UDPVoiceCELTAlpha;
 
-	cCodec = NULL;
-	ceEncoder = NULL;
-
 	iSampleRate = SAMPLE_RATE;
 	iFrameSize = SAMPLE_RATE / 100;
 
@@ -166,10 +162,6 @@ AudioInput::~AudioInput() {
 	if (opusState)
 		opus_encoder_destroy(opusState);
 #endif
-
-	if (ceEncoder) {
-		cCodec->celt_encoder_destroy(ceEncoder);
-	}
 
 	foreach(short *buf, qlEchoFrames)
 		delete [] buf;
@@ -611,55 +603,14 @@ bool AudioInput::selectCodec() {
 	}
 
 	if (!useOpus) {
-		CELTCodec *switchto = NULL;
-		if ((!g.uiSession || (g.s.lmLoopMode == Settings::Local)) && (!g.qmCodecs.isEmpty())) {
-			// Use latest for local loopback
-			QMap<int, CELTCodec *>::const_iterator i = g.qmCodecs.constEnd();
-			--i;
-			switchto = i.value();
-		} else {
-			// Currently talking, don't switch unless you must.
-			if (cCodec && bPreviousVoice) {
-				int v = cCodec->bitstreamVersion();
-				if ((v == g.iCodecAlpha) || (v == g.iCodecBeta))
-					switchto = cCodec;
-			}
-		}
-		if (!switchto) {
-			switchto = g.qmCodecs.value(g.bPreferAlpha ? g.iCodecAlpha : g.iCodecBeta);
-			if (!switchto)
-				switchto = g.qmCodecs.value(g.bPreferAlpha ? g.iCodecBeta : g.iCodecAlpha);
-		}
-		if (switchto != cCodec) {
-			if (cCodec && ceEncoder) {
-				cCodec->celt_encoder_destroy(ceEncoder);
-				ceEncoder = NULL;
-			}
-			cCodec = switchto;
-			if (cCodec)
-				ceEncoder = cCodec->encoderCreate();
-		}
-
-		if (!cCodec)
-			return false;
+		// Use Speex
 	}
 
 	MessageHandler::UDPMessageType previousType = umtType;
 	if (useOpus) {
 		umtType = MessageHandler::UDPVoiceOpus;
 	} else {
-		if (!g.uiSession) {
-			umtType = MessageHandler::UDPVoiceCELTAlpha;
-		} else {
-			int v = cCodec->bitstreamVersion();
-			if (v == g.iCodecAlpha)
-				umtType = MessageHandler::UDPVoiceCELTAlpha;
-			else if (v == g.iCodecBeta)
-				umtType = MessageHandler::UDPVoiceCELTBeta;
-			else {
-				qWarning() << "Couldn't find message type for codec version" << v;
-			}
-		}
+		// Speex?
 	}
 
 	if (umtType != previousType) {
@@ -683,23 +634,6 @@ int AudioInput::encodeOpusFrame(short *source, int size, unsigned char *buffer) 
 
 	iBitrate = len * 100 * 8;
 #endif
-	return len;
-}
-
-int AudioInput::encodeCELTFrame(short *psSource, unsigned char *buffer) {
-	int len = 0;
-	if (!cCodec)
-		return len;
-
-	if (!bPreviousVoice)
-		cCodec->celt_encoder_ctl(ceEncoder, CELT_RESET_STATE);
-
-	cCodec->celt_encoder_ctl(ceEncoder, CELT_SET_PREDICTION(0));
-
-	cCodec->celt_encoder_ctl(ceEncoder, CELT_SET_VBR_RATE(iAudioQuality));
-	len = cCodec->encode(ceEncoder, psSource, buffer, qMin(iAudioQuality / (8 * 100), 127));
-	iBitrate = len * 100 * 8;
-
 	return len;
 }
 
@@ -842,10 +776,7 @@ void AudioInput::encodeAudioFrame() {
 		return;
 
 	if (umtType == MessageHandler::UDPVoiceCELTAlpha || umtType == MessageHandler::UDPVoiceCELTBeta) {
-		len = encodeCELTFrame(psSource, buffer);
-		if (len == 0)
-			return;
-		++iBufferedFrames;
+		qWarning("No CELT encode support.");
 	} else if (umtType == MessageHandler::UDPVoiceOpus) {
 		encoded = false;
 		opusBuffer.insert(opusBuffer.end(), psSource, psSource + iFrameSize);

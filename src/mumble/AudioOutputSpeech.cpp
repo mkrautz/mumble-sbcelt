@@ -34,7 +34,6 @@
 #include "AudioOutputSpeech.h"
 
 #include "Audio.h"
-#include "CELTCodec.h"
 #include "ClientUser.h"
 #include "Global.h"
 #include "PacketDataStream.h"
@@ -49,7 +48,6 @@ AudioOutputSpeech::AudioOutputSpeech(ClientUser *user, unsigned int freq, Messag
 	umtType = type;
 	iMixerFreq = freq;
 
-	cCodec = NULL;
 	cdDecoder = NULL;
 	dsSpeex = NULL;
 	opusState = NULL;
@@ -115,7 +113,7 @@ AudioOutputSpeech::~AudioOutputSpeech() {
 		opus_decoder_destroy(opusState);
 #endif
 	if (cdDecoder) {
-		cCodec->celt_decoder_destroy(cdDecoder);
+		celt_decoder_destroy(cdDecoder);
 	} else if (dsSpeex) {
 		speex_bits_destroy(&sbBits);
 		speex_decoder_destroy(dsSpeex);
@@ -305,25 +303,22 @@ bool AudioOutputSpeech::needSamples(unsigned int snum) {
 
 				if (umtType == MessageHandler::UDPVoiceCELTAlpha || umtType == MessageHandler::UDPVoiceCELTBeta) {
 					int wantversion = (umtType == MessageHandler::UDPVoiceCELTAlpha) ? g.iCodecAlpha : g.iCodecBeta;
-					if ((p == &LoopUser::lpLoopy) && (! g.qmCodecs.isEmpty())) {
-						QMap<int, CELTCodec *>::const_iterator i = g.qmCodecs.constEnd();
-						--i;
-						wantversion = i.key();
+					static int hasversion = 0;
+					if (hasversion == 0)
+						celt_mode_info(cmMode, CELT_GET_BITSTREAM_VERSION, reinterpret_cast<celt_int32 *>(&hasversion));
+
+					if (wantversion != hasversion)
+						memset(pOut, 0, sizeof(float)*iFrameSize);
+					else {
+						if (cmMode == NULL)
+							cmMode = celt_mode_create(SAMPLE_RATE, SAMPLE_RATE / 100, NULL);
+						if (cdDecoder == NULL)
+							cdDecoder = celt_decoder_create(cmMode, 1, NULL);
+						if (cdDecoder)
+							celt_decode_float(cdDecoder, qba.isEmpty() ? NULL : reinterpret_cast<const unsigned char *>(qba.constData()), qba.size(), pOut);
+						else
+							memset(pOut, 0, sizeof(float) * iFrameSize);
 					}
-					if (cCodec && (cCodec->bitstreamVersion() != wantversion)) {
-						cCodec->celt_decoder_destroy(cdDecoder);
-						cdDecoder = NULL;
-					}
-					if (! cCodec) {
-						cCodec = g.qmCodecs.value(wantversion);
-						if (cCodec) {
-							cdDecoder = cCodec->decoderCreate();
-						}
-					}
-					if (cdDecoder)
-						cCodec->decode_float(cdDecoder, qba.isEmpty() ? NULL : reinterpret_cast<const unsigned char *>(qba.constData()), qba.size(), pOut);
-					else
-						memset(pOut, 0, sizeof(float) * iFrameSize);
 				} else if (umtType == MessageHandler::UDPVoiceOpus) {
 #ifdef USE_OPUS
 					decodedSamples = opus_decode_float(opusState, qba.isEmpty() ? NULL : reinterpret_cast<const unsigned char *>(qba.constData()), qba.size(), pOut, iAudioBufferSize, 0);
@@ -370,7 +365,7 @@ bool AudioOutputSpeech::needSamples(unsigned int snum) {
 			} else {
 				if (umtType == MessageHandler::UDPVoiceCELTAlpha || umtType == MessageHandler::UDPVoiceCELTBeta) {
 					if (cdDecoder)
-						cCodec->decode_float(cdDecoder, NULL, 0, pOut);
+						celt_decode_float(cdDecoder, NULL, 0, pOut);
 					else
 						memset(pOut, 0, sizeof(float) * iFrameSize);
 				} else if (umtType == MessageHandler::UDPVoiceOpus) {

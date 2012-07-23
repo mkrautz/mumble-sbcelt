@@ -34,60 +34,12 @@
 
 #include "AudioInput.h"
 #include "AudioOutput.h"
-#include "CELTCodec.h"
 #include "Global.h"
 #include "PacketDataStream.h"
-
-class CodecInit : public DeferInit {
-	public:
-		void initialize();
-		void destroy();
-};
 
 #define DOUBLE_RAND (rand()/static_cast<double>(RAND_MAX))
 
 LoopUser LoopUser::lpLoopy;
-CodecInit ciInit;
-
-void CodecInit::initialize() {
-	CELTCodec *codec = NULL;
-
-	codec = new CELTCodec070(QLatin1String("0.7.0"));
-	if (codec->isValid()) {
-		codec->report();
-		g.qmCodecs.insert(codec->bitstreamVersion(), codec);
-	} else {
-		delete codec;
-		codec = new CELTCodec070(QLatin1String("0.0.0"));
-		if (codec->isValid()) {
-			codec->report();
-			g.qmCodecs.insert(codec->bitstreamVersion(), codec);
-		} else {
-			delete codec;
-		}
-	}
-
-	codec = new CELTCodec011(QLatin1String("0.11.0"));
-	if (codec->isValid()) {
-		codec->report();
-		g.qmCodecs.insert(codec->bitstreamVersion(), codec);
-	} else {
-		delete codec;
-		codec = new CELTCodec011(QLatin1String("2.0.0"));
-		if (codec->isValid()) {
-			codec->report();
-			g.qmCodecs.insert(codec->bitstreamVersion(), codec);
-		} else {
-			delete codec;
-		}
-	}
-}
-
-void CodecInit::destroy() {
-	foreach(CELTCodec *codec, g.qmCodecs)
-		delete codec;
-	g.qmCodecs.clear();
-}
 
 LoopUser::LoopUser() {
 	qsName = QLatin1String("Loopy");

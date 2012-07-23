@@ -43,7 +43,6 @@
 #include "AudioOutputUser.h"
 #include "Message.h"
 
-class CELTCodec;
 class ClientUser;
 struct OpusDecoder;
 
@@ -74,9 +73,8 @@ class AudioOutputSpeech : public AudioOutputUser {
 		JitterBuffer *jbJitter;
 		int iMissCount;
 
-		CELTCodec *cCodec;
+		CELTMode    *cmMode;
 		CELTDecoder *cdDecoder;
-
 		OpusDecoder *opusState;
 
 		SpeexBits sbBits;
