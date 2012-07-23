@@ -146,6 +146,17 @@ int main(int argc, char **argv) {
 #endif
 #endif
 
+#ifdef Q_OS_LINUX
+	{
+		// For now, force Mumble to use sbcelt-helper from the same directory as the 'mumble' executable.
+		QFileInfo fi(QString::fromLocal8Bit(argv[0]));
+		QDir d = fi.dir();
+		QString helper = d.absoluteFilePath(QString::fromLatin1("sbcelt-helper"));
+		qWarning("helper = %s", qPrintable(helper));
+		setenv("SBCELT_HELPER_BINARY", helper.toUtf8().constData(), 1);
+	}
+#endif
+
 	// Initialize application object.
 	QAppMumble a(argc, argv);
 	a.setApplicationName(QLatin1String("Mumble"));

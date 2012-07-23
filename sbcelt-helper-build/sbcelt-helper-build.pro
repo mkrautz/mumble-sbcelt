@@ -4,7 +4,7 @@ BUILDDIR=$$basename(PWD)
 SOURCEDIR=$$replace(BUILDDIR,-helper-build,-src)
 CELTDIR=../celt-0.7.0-src/libcelt
 
-!exists($$CELTDIR/COPYING) {
+!exists($$CELTDIR/../COPYING) {
         message("The $$CELTDIR/ directory was not found. You need to do the following:")
         message("")
         message("Use CELT Git:")

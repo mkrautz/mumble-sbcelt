@@ -2,6 +2,7 @@ include(../compiler.pri)
 
 BUILDDIR=$$basename(PWD)
 SOURCEDIR=$$replace(BUILDDIR,-lib-build,-src)
+CELTDIR=../celt-0.7.0-src
 
 !exists($$CELTDIR/COPYING) {
         message("The $$CELTDIR/ directory was not found. You need to do the following:")
@@ -31,7 +32,7 @@ CONFIG += warn_off
 CONFIG += static
 VPATH	= ../$$SOURCEDIR/lib
 TARGET = sbcelt
-INCLUDEPATH = ../celt-0.7.0-src/libcelt
+INCLUDEPATH = $$CELTDIR/libcelt
 
 QMAKE_CFLAGS -= -fPIE -pie
 
