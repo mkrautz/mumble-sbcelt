@@ -152,7 +152,6 @@ int main(int argc, char **argv) {
 		QFileInfo fi(QString::fromLocal8Bit(argv[0]));
 		QDir d = fi.dir();
 		QString helper = d.absoluteFilePath(QString::fromLatin1("sbcelt-helper"));
-		qWarning("helper = %s", qPrintable(helper));
 		setenv("SBCELT_HELPER_BINARY", helper.toUtf8().constData(), 1);
 	}
 #endif
