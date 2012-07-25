@@ -15,8 +15,9 @@ PRECOMPILED_HEADER = mumble_pch.hpp
 INCLUDEPATH *= ../bonjour
 
 CONFIG(sbcelt) {
- INCLUDEPATH *= ../../celt-0.7.0-src/libcelt
- LIBS *= -lsbcelt
+ INCLUDEPATH *= ../../celt-0.7.0-src/libcelt ../../sbcelt-src
+ LIBS *= -lcelt -lsbcelt
+ DEFINES *= SBCELT_PREFIX_API SBCELT_COMPAT_API USE_SBCELT
 }
 
 isEmpty(QMAKE_LRELEASE) {

@@ -42,6 +42,10 @@
 #include "opus.h"
 #endif
 
+#ifdef USE_SBCELT
+#include "sbcelt.h"
+#endif
+
 AudioOutputSpeech::AudioOutputSpeech(ClientUser *user, unsigned int freq, MessageHandler::UDPMessageType type) : AudioOutputUser(user->qsName) {
 	int err;
 	p = user;
@@ -303,21 +307,18 @@ bool AudioOutputSpeech::needSamples(unsigned int snum) {
 
 				if (umtType == MessageHandler::UDPVoiceCELTAlpha || umtType == MessageHandler::UDPVoiceCELTBeta) {
 					int wantversion = (umtType == MessageHandler::UDPVoiceCELTAlpha) ? g.iCodecAlpha : g.iCodecBeta;
-					static int hasversion = 0;
-					if (hasversion == 0)
-						celt_mode_info(cmMode, CELT_GET_BITSTREAM_VERSION, reinterpret_cast<celt_int32 *>(&hasversion));
-
+					int hasversion = 0x8000000b; // CELT 0.7.1 bitstream
 					if (wantversion != hasversion)
 						memset(pOut, 0, sizeof(float)*iFrameSize);
 					else {
-						if (cmMode == NULL)
-							cmMode = celt_mode_create(SAMPLE_RATE, SAMPLE_RATE / 100, NULL);
-						if (cdDecoder == NULL)
-							cdDecoder = celt_decoder_create(cmMode, 1, NULL);
-						if (cdDecoder)
-							celt_decode_float(cdDecoder, qba.isEmpty() ? NULL : reinterpret_cast<const unsigned char *>(qba.constData()), qba.size(), pOut);
-						else
-							memset(pOut, 0, sizeof(float) * iFrameSize);
+                                                if (cmMode == NULL)
+                                                        cmMode = celt_mode_create(SAMPLE_RATE, SAMPLE_RATE / 100, NULL);
+                                                if (cdDecoder == NULL)
+                                                        cdDecoder = celt_decoder_create(cmMode, 1, NULL);
+                                                if (cdDecoder)
+                                                        celt_decode_float(cdDecoder, qba.isEmpty() ? NULL : reinterpret_cast<const unsigned char *>(qba.constData()), qba.size(), pOut);
+                                                else
+                                                        memset(pOut, 0, sizeof(float) * iFrameSize);
 					}
 				} else if (umtType == MessageHandler::UDPVoiceOpus) {
 #ifdef USE_OPUS

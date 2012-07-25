@@ -119,6 +119,8 @@ class AudioInput : public QThread {
 		SpeexPreprocessState *sppPreprocess;
 		SpeexEchoState *sesEcho;
 
+		CELTEncoder *ceEncoder;
+
 		int iAudioQuality;
 		int iAudioFrames;
 

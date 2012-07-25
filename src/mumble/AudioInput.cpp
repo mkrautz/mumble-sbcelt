@@ -102,6 +102,9 @@ AudioInput::AudioInput() : opusBuffer(g.s.iFramesPerPacket * (SAMPLE_RATE / 100)
 
 	umtType = MessageHandler::UDPVoiceCELTAlpha;
 
+	CELTMode *m = celt_mode_create(SAMPLE_RATE, SAMPLE_RATE / 100, NULL);
+	ceEncoder = celt_encoder_create(m, 1, NULL);
+
 	iSampleRate = SAMPLE_RATE;
 	iFrameSize = SAMPLE_RATE / 100;
 
@@ -162,6 +165,10 @@ AudioInput::~AudioInput() {
 	if (opusState)
 		opus_encoder_destroy(opusState);
 #endif
+
+	if (ceEncoder) {
+		celt_encoder_destroy(ceEncoder);
+	}
 
 	foreach(short *buf, qlEchoFrames)
 		delete [] buf;
@@ -602,15 +609,22 @@ bool AudioInput::selectCodec() {
 #endif
 	}
 
-	if (!useOpus) {
-		// Use Speex
-	}
-
 	MessageHandler::UDPMessageType previousType = umtType;
 	if (useOpus) {
 		umtType = MessageHandler::UDPVoiceOpus;
 	} else {
-		// Speex?
+		if (!g.uiSession) {
+			umtType = MessageHandler::UDPVoiceCELTAlpha;
+		} else {
+			int v = 0x8000000b; // CELT 0.7.1 bitstream
+			if (v == g.iCodecAlpha)
+				umtType = MessageHandler::UDPVoiceCELTAlpha;
+			else if (v == g.iCodecBeta)
+				umtType = MessageHandler::UDPVoiceCELTBeta;
+			else {
+				qWarning() << "Couldn't find message type for codec version" << v;
+			}
+		}
 	}
 
 	if (umtType != previousType) {
@@ -634,6 +648,21 @@ int AudioInput::encodeOpusFrame(short *source, int size, unsigned char *buffer) 
 
 	iBitrate = len * 100 * 8;
 #endif
+	return len;
+}
+
+int AudioInput::encodeCELTFrame(short *psSource, unsigned char *buffer) {
+	int len = 0;
+
+	if (!bPreviousVoice)
+		celt_encoder_ctl(ceEncoder, CELT_RESET_STATE);
+
+	celt_encoder_ctl(ceEncoder, CELT_SET_PREDICTION(0));
+
+	celt_encoder_ctl(ceEncoder, CELT_SET_VBR_RATE(iAudioQuality));
+	len = celt_encode(ceEncoder, psSource, NULL, buffer, qMin(iAudioQuality / (8 * 100), 127));
+	iBitrate = len * 100 * 8;
+
 	return len;
 }
 
@@ -776,7 +805,10 @@ void AudioInput::encodeAudioFrame() {
 		return;
 
 	if (umtType == MessageHandler::UDPVoiceCELTAlpha || umtType == MessageHandler::UDPVoiceCELTBeta) {
-		qWarning("No CELT encode support.");
+		len = encodeCELTFrame(psSource, buffer);
+		if (len == 0)
+			return;
+		++iBufferedFrames;
 	} else if (umtType == MessageHandler::UDPVoiceOpus) {
 		encoded = false;
 		opusBuffer.insert(opusBuffer.end(), psSource, psSource + iFrameSize);

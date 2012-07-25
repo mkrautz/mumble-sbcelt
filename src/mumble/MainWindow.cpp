@@ -2271,7 +2271,7 @@ void MainWindow::viewCertificate(bool) {
 void MainWindow::serverConnected() {
 	g.uiSession = 0;
 	g.pPermissions = ChanACL::None;
-	g.iCodecAlpha = 0x8000000b;
+	g.iCodecAlpha = 0x8000000b; // CELT 0.7.1 bitstream
 	g.bPreferAlpha = true;
 #ifdef USE_OPUS
 	g.bOpus = true;

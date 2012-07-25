@@ -33,6 +33,7 @@ CONFIG += static
 VPATH	= ../$$SOURCEDIR/lib
 TARGET = sbcelt
 INCLUDEPATH = $$CELTDIR/libcelt
+DEFINES += SBCELT_PREFIX_API
 
 QMAKE_CFLAGS -= -fPIE -pie
 
