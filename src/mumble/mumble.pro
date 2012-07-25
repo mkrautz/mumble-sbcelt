@@ -18,6 +18,9 @@ CONFIG(sbcelt) {
  INCLUDEPATH *= ../../celt-0.7.0-src/libcelt ../../sbcelt-src
  LIBS *= -lcelt -lsbcelt
  DEFINES *= SBCELT_PREFIX_API SBCELT_COMPAT_API USE_SBCELT
+} else {
+ INCLUDEPATH   *= ../../celt-0.7.0-src/libcelt
+ LIBS *= -lcelt
 }
 
 isEmpty(QMAKE_LRELEASE) {
@@ -49,20 +52,6 @@ CONFIG(no-bundled-speex) {
 !CONFIG(no-bundled-speex) {
   INCLUDEPATH	*= ../../speex/include ../../speex/libspeex ../../speexbuild
   LIBS 		*= -lspeex
-}
-
-unix:!CONFIG(bundled-celt):system(pkg-config --atleast-version=0.7.0 celt) {
-  CONFIG	*= no-bundled-celt
-}
-
-CONFIG(no-bundled-celt):!CONFIG(sbcelt) {
-  INCLUDEPATH	*= /usr/include/celt
-  LIBS *= -lcelt  # fixme: no system is going to have celt 0.7.0; perhaps we should just drop no-bundled-celt?
-}
-
-!CONFIG(no-bundled-celt):!CONFIG(sbcelt) {
-  INCLUDEPATH	*= ../../celt-0.7.0-src/libcelt
-  LIBS *= -lcelt
 }
 
 !win32 {
