@@ -60,6 +60,12 @@ CONFIG+=no-bundled-speex (Mumble)
  Note that this requires your system-installed Speex to be at least version
  1.2.0.
 
+CONFIG+=sbcelt (Mumble, Linux)
+ Use the SBCELT library for decoding incoming CELT frames. The SBCELT
+ library decodes CELT frames in an external helper program, and attempts
+ to sandbox this program if at all possible. (Sandboxing requires that
+ seccomp filters are supported by the kernel.)
+
 CONFIG+=optimize
  Build a heavily optimized version, specific to the machine it's being
  compiled on.
