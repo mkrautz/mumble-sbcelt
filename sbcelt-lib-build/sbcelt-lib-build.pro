@@ -41,7 +41,18 @@ unix {
 	INCLUDEPATH += ../$$BUILDDIR
 }
 
-SOURCES *= libsbcelt.c closefrom.c mtime.c futex.c stub.c
+SOURCES *= libsbcelt.c closefrom.c mtime.c stub.c
+
+unix:!macx {
+	UNAME=$$system(uname -s)
+	contains(UNAME, Linux) {
+		SOURCES *= futex-linux.c
+	}
+}
+
+macx {
+	SOURCES *= futex-stub.c
+}
 
 CONFIG(debug, debug|release) {
   CONFIG += console

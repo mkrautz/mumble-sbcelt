@@ -31,8 +31,8 @@ CONFIG -= warn-on
 VPATH   = ../$$SOURCEDIR/helper
 TARGET = sbcelt-helper
 DEFINES += HAVE_CONFIG_H
-INCLUDEPATH += ../$$SOURCEDIR/helper ../$$SOURCEDIR/lib $$CELTDIR
-LIBS += -lrt -lpthread
+INCLUDEPATH += ../$$SOURCEDIR/helper ../$$SOURCEDIR/lib ../$$SOURCEDIR $$CELTDIR
+LIBS += -lpthread
 
 SOURCES = \
         $$CELTDIR/bands.c \
@@ -54,10 +54,20 @@ SOURCES = \
         $$CELTDIR/rangeenc.c \
         $$CELTDIR/rate.c \
         $$CELTDIR/vq.c \
-	../lib/futex.c \
 	sbcelt-helper.c \
-	seccomp-sandbox.c \
 	alloc.c
+
+unix:!macx {
+	UNAME=$$system(uname -s)
+	contains(UNAME, Linux) {
+		SOURCES *= ../lib/futex-linux.c seccomp-sandbox.c sbcelt-sandbox-linux.c
+		LIBS += -lrt
+	}
+}
+
+macx {
+	SOURCES *= ../lib/futex-stub.c sbcelt-sandbox-darwin.c
+}
 
 CONFIG(release, debug|release) {
   DESTDIR = ../release
