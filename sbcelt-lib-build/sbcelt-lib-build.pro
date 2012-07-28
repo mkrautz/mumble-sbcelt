@@ -41,7 +41,7 @@ unix {
 	INCLUDEPATH += ../$$BUILDDIR
 }
 
-SOURCES *= libsbcelt.c
+SOURCES *= libsbcelt.c closefrom.c mtime.c futex.c stub.c
 
 CONFIG(debug, debug|release) {
   CONFIG += console

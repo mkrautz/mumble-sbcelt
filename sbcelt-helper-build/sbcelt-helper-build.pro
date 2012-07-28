@@ -31,7 +31,7 @@ CONFIG -= warn-on
 VPATH   = ../$$SOURCEDIR/helper
 TARGET = sbcelt-helper
 DEFINES += HAVE_CONFIG_H
-INCLUDEPATH += ../$$SOURCEDIR/helper $$CELTDIR
+INCLUDEPATH += ../$$SOURCEDIR/helper ../$$SOURCEDIR/lib $$CELTDIR
 LIBS += -lrt -lpthread
 
 SOURCES = \
@@ -54,9 +54,10 @@ SOURCES = \
         $$CELTDIR/rangeenc.c \
         $$CELTDIR/rate.c \
         $$CELTDIR/vq.c \
+	../lib/futex.c \
 	sbcelt-helper.c \
 	seccomp-sandbox.c \
-	seccomp-sandbox.h
+	alloc.c
 
 CONFIG(release, debug|release) {
   DESTDIR = ../release
