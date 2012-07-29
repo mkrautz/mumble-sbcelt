@@ -25,7 +25,7 @@ CELTDIR=../celt-0.7.0-src/libcelt
 }
 
 TEMPLATE = app
-CONFIG -= qt
+CONFIG -= qt app_bundle
 CONFIG *= debug_and_release
 CONFIG -= warn-on
 VPATH   = ../$$SOURCEDIR/helper

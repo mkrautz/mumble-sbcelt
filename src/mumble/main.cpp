@@ -146,7 +146,7 @@ int main(int argc, char **argv) {
 #endif
 #endif
 
-#ifdef Q_OS_LINUX
+#if defined(Q_OS_LINUX) || defined(Q_OS_MAC)
 	{
 		// For now, force Mumble to use sbcelt-helper from the same directory as the 'mumble' executable.
 		QFileInfo fi(QString::fromLocal8Bit(argv[0]));
