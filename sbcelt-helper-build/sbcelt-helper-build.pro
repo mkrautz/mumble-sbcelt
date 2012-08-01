@@ -60,13 +60,16 @@ SOURCES = \
 unix:!macx {
 	UNAME=$$system(uname -s)
 	contains(UNAME, Linux) {
-		SOURCES *= ../lib/futex-linux.c seccomp-sandbox.c sbcelt-sandbox-linux.c
+		SOURCES *= ../lib/futex-linux.c seccomp-sandbox.c sbcelt-sandbox-linux.c pdeath-linux.c
 		LIBS += -lrt
+	}
+	contains(UNAME, FreeBSD) {
+		SOURCES *= ../lib/futex-freebsd.c sbcelt-sandbox-freebsd.c pdeath-kqueue.c
 	}
 }
 
 macx {
-	SOURCES *= ../lib/futex-stub.c sbcelt-sandbox-darwin.c
+	SOURCES *= ../lib/futex-stub.c sbcelt-sandbox-darwin.c pdeath-kqueue.c
 }
 
 CONFIG(release, debug|release) {

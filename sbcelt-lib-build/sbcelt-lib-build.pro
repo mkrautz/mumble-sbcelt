@@ -41,12 +41,15 @@ unix {
 	INCLUDEPATH += ../$$BUILDDIR
 }
 
-SOURCES *= libsbcelt.c closefrom.c mtime.c stub.c
+SOURCES *= libsbcelt.c mtime.c stub.c
 
 unix:!macx {
 	UNAME=$$system(uname -s)
 	contains(UNAME, Linux) {
-		SOURCES *= futex-linux.c
+		SOURCES *= futex-linux.c closefrom.c
+	}
+	contains(UNAME, FreeBSD) {
+		SOURCES *= futex-freebsd.c closefrom-sys.c
 	}
 }
 
